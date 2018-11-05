@@ -41,25 +41,35 @@
     <div id="siteWelcome" class="site-welcome active">
         <div class="loading"></div>
     </div>
-    <div class="topNavBar clearfix">
+    <div id="topNavBar" class="topNavBar clearfix">
         <div class="topBar-inner clearfix">
             <a href="#" alt="logo" class="logo" style="float:left">
                 <span class="rs">RS</span>
                 <span class="card">card</span>
             </a>
-            <nav style="float:right;">
+            <nav class="menu" style="float:right;">
                 <ul class="clearfix">
                     <li>
-                        <a href="#">关于</a>
+                        <a href="#siteAbout">关于</a>
                     </li>
                     <li>
-                        <a href="#">技能</a>
+                        <a href="#siteSkills">技能</a>
                     </li>
                     <li>
-                        <a href="#">作品</a>
+                        <a href="#siteWorks"><span>作品</span></a>
+                        <ul class="submenu">
+                            <li>作品1</li>
+                            <li>作品2</li>
+                            <li>作品3</li>
+                        </ul>
                     </li>
                     <li>
-                        <a href="#">博客</a>
+                        <a href="#blogs">博客</a>
+                        <ul class="submenu">
+                            <li>博客1</li>
+                            <li>博客2</li>
+                            <li>博客3</li>
+                        </ul>
                     </li>
                     <li>
                         <a href="#">日历</a>
@@ -78,7 +88,7 @@
         <div class="mask"></div>
     </div>
     <main>
-        <div class="userCard">
+        <div data-x id="siteAbout" class="userCard">
             <div class="pictureAndText clearfix">
                 <div class="picture">
                     <img src="./img/avatar.jpg" alt="avatar">
@@ -136,7 +146,7 @@
             <br> 技能：HTML、CSS、JavaScript
         </p>
     </main>
-    <section class="skills">
+    <section data-x id="siteSkills" class="skills">
         <h2>技能</h2>
         <ul class="clearfix">
             <li>
@@ -177,7 +187,7 @@
             </li>
         </ul>
     </section>
-    <section class="portfolio">
+    <section data-x id="siteWorks" class="portfolio">
         <h2>作品集</h2>
         <nav>
             <ul class="clearfix">
@@ -203,17 +213,103 @@
         </script>
         <div class="works">
             <div class="big">
-
+                
             </div>
             <div class="small"></div>
             <div class="small"></div>
         </div>
     </section>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/17.2.0/Tween.min.js"></script>
     <script>
         var siteWelcome = document.getElementById('siteWelcome')
         setTimeout(function () {
             siteWelcome.classList.remove('active')
-        }, 1000)
+        }, 100)
+        //添加 offset 类
+        let specialTags = document.querySelectorAll('[data-x]')
+        for(let i = 0; i < specialTags.length; i++){
+            specialTags[i].classList.add('offset')
+        }
+        setTimeout(function(){
+            findClosest()
+        },200)
+        window.onscroll = function (e) {
+            var topNavBar = document.getElementById('topNavBar')
+            if (window.scrollY > 0) {
+                topNavBar.classList.add('sticky')
+            } else {
+                topNavBar.classList.remove('sticky')
+            }
+            findClosest()
+            
+        }
+
+        function findClosest(){
+            let specialTags = document.querySelectorAll('[data-x]')
+            let minIndex = 0
+            for(let i = 1; i < specialTags.length; i++){
+                if(Math.abs(specialTags[i].offsetTop - window.scrollY) < Math.abs(specialTags[minIndex].offsetTop - window.scrollY)){
+                    minIndex = i
+                }
+            }
+            
+            for(let i = 0; i < specialTags.length; i++){
+                specialTags[i].classList.remove('active')
+            }
+            specialTags[minIndex].classList.remove('offset')
+
+            specialTags[minIndex].classList.add('active')
+            let id = specialTags[minIndex].id
+            let a = document.querySelector('a[href="#'+ id + '"]')
+            let li = a.parentNode
+            let brothers = li.parentNode.children
+            for(let i = 0; i < brothers.length; i++){
+                brothers[i].classList.remove('highlight')
+            }
+            li.classList.add('highlight')
+        }
+        let liTags = document.querySelectorAll('nav.menu > ul > li')
+        for (var i = 0; i < liTags.length; i++) {
+            liTags[i].onmouseenter = function (e) {
+                e.currentTarget.classList.add('active')
+            }
+            liTags[i].onmouseleave = function (e) {
+                e.currentTarget.classList.remove('active')
+            }
+        }
+
+        //切换菜单增加缓动
+        let aTags = document.querySelectorAll('nav.menu > ul > li > a')
+
+        function animate(time) {
+            requestAnimationFrame(animate);
+            TWEEN.update(time);
+        }
+        requestAnimationFrame(animate);
+
+        for (let i = 0; i < aTags.length; i++) {
+            aTags[i].onclick = function (x) {
+                x.preventDefault()
+                let a = x.currentTarget
+                let href = a.getAttribute('href')
+                let element = document.querySelector(href)
+                let top = element.offsetTop
+
+                let currentTop = window.scrollY
+                let targetTop = top - 80
+                let s = targetTop - currentTop
+                var coords = {y: currentTop}
+                var t = Math.abs(s/100 * 300) //100px用300ms
+                if(t>500){ t = 500 }
+                var tween = new TWEEN.Tween(coords)
+                    .to({y: targetTop}, t)
+                    .easing(TWEEN.Easing.Quadratic.InOut)
+                    .onUpdate(function () {
+                        window.scrollTo(0, coords.y)
+                    })
+                    .start();
+            }
+        }
     </script>
 </body>
 
